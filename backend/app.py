@@ -1,13 +1,6 @@
 """
-Safe Bend Vision — Flask API
-==============================
-Endpoints:
-  GET /api/status      → JSON detection state
-  GET /api/stream/a    → MJPEG stream Side A
-  GET /api/stream/b    → MJPEG stream Side B
-  GET /api/health      → health check
-
-Run via:  python run.py
+Safe Bend Vision - Backend API
+This Flask app serves the MJPEG streams and status JSON to the React frontend.
 """
 
 from flask import Flask, Response, jsonify

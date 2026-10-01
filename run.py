@@ -1,10 +1,6 @@
 """
-Safe Bend Vision — Unified Launcher
-=====================================
-Starts detection threads + Flask API in one process.
-
-Usage:
-    python run.py
+Safe Bend Vision - Unified Launcher
+This script starts both the camera detection threads and the Flask server at once.
 """
 
 import threading

@@ -1,11 +1,6 @@
 """
-Safe Bend Vision — Main Detection Script
-=========================================
-Hardware : Raspberry Pi 5
-Cameras  : Dual USB (index 0 and 2)
-Model    : YOLOv8n (COCO — classes 2,3,5,7)
-GPIO     : Side A → R:17 G:27 B:22 | Side B → R:5 G:6 B:13
-LED logic: Green = clear | Yellow(R+G) = vehicle far | Red = vehicle close
+Safe Bend Vision - Object detection script
+This script runs the YOLOv8 model on two USB cameras and controls the GPIO LED warnings.
 """
 
 import cv2
@@ -15,14 +10,14 @@ import logging
 from ultralytics import YOLO
 from gpiozero import LED
 
-# ── Logging ────────────────────────────────────────────────────────────────────
+# Setup basic logging so we can see what is happening in the terminal
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 log = logging.getLogger("SafeBend")
 
-# ── Config ─────────────────────────────────────────────────────────────────────
+# Load up our YOLOv8 model for vehicle detection
 MODEL_PATH        = "models/yolov8n.pt"
 CAMERA_A_INDEX    = 0
 CAMERA_B_INDEX    = 2
@@ -36,7 +31,7 @@ CLOSE_THRESH = 0.15   # > 15% of frame → RED
 FAR_THRESH   = 0.03   # 3–15%          → YELLOW
                        # < 3% / none    → GREEN
 
-# ── GPIO ───────────────────────────────────────────────────────────────────────
+# Hardware setup: Define how we talk to the warning LEDs via GPIO
 class SideLEDs:
     def __init__(self, pin_r, pin_g, pin_b, name):
         self.name = name
@@ -70,18 +65,18 @@ class SideLEDs:
 led_a = SideLEDs(17, 27, 22, "Side-A")
 led_b = SideLEDs( 5,  6, 13, "Side-B")
 
-# ── Shared state ───────────────────────────────────────────────────────────────
+# A thread-safe dictionary to share camera data with the Flask API
 state = {
     "a": {"status": "clear", "confidence": 0.0, "vehicle_count": 0, "frame": None},
     "b": {"status": "clear", "confidence": 0.0, "vehicle_count": 0, "frame": None},
 }
 state_lock = threading.Lock()
 
-# ── Model ──────────────────────────────────────────────────────────────────────
+# Load up our YOLOv8 model for vehicle detection
 model = YOLO(MODEL_PATH)
 log.info(f"YOLOv8 model loaded: {MODEL_PATH}")
 
-# ── Detection helpers ──────────────────────────────────────────────────────────
+# Helper functions to figure out how close the vehicles actually are
 def classify_bbox(x1, y1, x2, y2, fw, fh):
     ratio = ((x2 - x1) * (y2 - y1)) / (fw * fh)
     if ratio >= CLOSE_THRESH:
@@ -130,7 +125,7 @@ def process_frame(frame, side_label, led: SideLEDs):
     return frame, worst, best_conf, count
 
 
-# ── Camera thread ──────────────────────────────────────────────────────────────
+# The main loop for each camera: grabs frames, runs YOLO, updates LEDs and state
 def camera_loop(cam_index, side_label, led):
     cap = cv2.VideoCapture(cam_index)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,  FRAME_WIDTH)
@@ -164,7 +159,7 @@ def camera_loop(cam_index, side_label, led):
     cap.release()
 
 
-# ── Entry point ────────────────────────────────────────────────────────────────
+# Spin up everything when we run the script directly
 if __name__ == "__main__":
     log.info("Safe Bend Vision — starting detection threads")
 
