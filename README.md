@@ -2,7 +2,7 @@
 
 **AI-powered vehicle detection and warning system for blind curves on rural roads.**
 
-Developed as a first-year engineering project at the Faculty of Technology, Sabaragamuwa University of Sri Lanka (SUSL).
+Developed as a first-year Mechanical Engineering Technology project at the Faculty of Technology, Sabaragamuwa University of Sri Lanka (SUSL).
 
 ---
 
