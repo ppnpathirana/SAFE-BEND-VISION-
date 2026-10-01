@@ -219,7 +219,7 @@ Submitted as part of URSTech 2026 — University Research Symposium on Technolog
 
 ## Author
 
-**P. Pathirana**
+**P.P.N. PATHIRANA**
 Faculty of Technology — Mechanical Technology
 Sabaragamuwa University of Sri Lanka
 IAENG Member No. 566684

@@ -163,7 +163,7 @@ export default function App() {
       <EventLog events={events} />
 
       <footer className="app-footer">
-        Safe Bend Vision · v1.0.0 · P. Pathirana — SUSL · GPIO BCM A=17,27,22 · B=5,6,13
+        Safe Bend Vision · v1.0.0 · P.P.N. PATHIRANA — SUSL · GPIO BCM A=17,27,22 · B=5,6,13
       </footer>
     </div>
   );
