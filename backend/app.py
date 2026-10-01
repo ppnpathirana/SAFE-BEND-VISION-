@@ -6,6 +6,7 @@ This Flask app serves the MJPEG streams and status JSON to the React frontend.
 from flask import Flask, Response, jsonify
 from flask_cors import CORS
 import sys, os, time
+from typing import Any, Generator
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from detection import state, state_lock
@@ -15,7 +16,7 @@ CORS(app)
 
 
 @app.route("/api/status")
-def get_status():
+def get_status() -> Any:
     with state_lock:
         return jsonify({
             "timestamp": time.time(),
@@ -36,7 +37,7 @@ def get_status():
         })
 
 
-def _mjpeg(side_key):
+def _mjpeg(side_key: str) -> Generator[bytes, None, None]:
     while True:
         with state_lock:
             frame = state[side_key]["frame"]
@@ -49,17 +50,17 @@ def _mjpeg(side_key):
 
 
 @app.route("/api/stream/a")
-def stream_a():
+def stream_a() -> Response:
     return Response(_mjpeg("a"), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 
 @app.route("/api/stream/b")
-def stream_b():
+def stream_b() -> Response:
     return Response(_mjpeg("b"), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 
 @app.route("/api/health")
-def health():
+def health() -> Any:
     return jsonify({"status": "ok", "timestamp": time.time()})
 
 

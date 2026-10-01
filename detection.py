@@ -6,6 +6,7 @@ This script runs the YOLOv8 model on two USB cameras and controls the GPIO LED w
 import cv2
 import threading
 import time
+from typing import Tuple, Any, Dict
 import logging
 from ultralytics import YOLO
 from gpiozero import LED
@@ -33,7 +34,8 @@ FAR_THRESH   = 0.03   # 3–15%          → YELLOW
 
 # Hardware setup: Define how we talk to the warning LEDs via GPIO
 class SideLEDs:
-    def __init__(self, pin_r, pin_g, pin_b, name):
+    """Manages the three warning LEDs (Red, Green, Blue) for a specific side."""
+    def __init__(self, pin_r: int, pin_g: int, pin_b: int, name: str) -> None:
         self.name = name
         self.r = LED(pin_r)
         self.g = LED(pin_g)
@@ -77,7 +79,7 @@ model = YOLO(MODEL_PATH)
 log.info(f"YOLOv8 model loaded: {MODEL_PATH}")
 
 # Helper functions to figure out how close the vehicles actually are
-def classify_bbox(x1, y1, x2, y2, fw, fh):
+def classify_bbox(x1: int, y1: int, x2: int, y2: int, fw: int, fh: int) -> str:
     ratio = ((x2 - x1) * (y2 - y1)) / (fw * fh)
     if ratio >= CLOSE_THRESH:
         return "close"
@@ -86,7 +88,7 @@ def classify_bbox(x1, y1, x2, y2, fw, fh):
     return "clear"
 
 
-def process_frame(frame, side_label, led: SideLEDs):
+def process_frame(frame: Any, side_label: str, led: SideLEDs) -> Tuple[Any, str, float, int]:
     h, w = frame.shape[:2]
     results = model(frame, conf=CONFIDENCE_THRESH, verbose=False)[0]
 
@@ -126,7 +128,7 @@ def process_frame(frame, side_label, led: SideLEDs):
 
 
 # The main loop for each camera: grabs frames, runs YOLO, updates LEDs and state
-def camera_loop(cam_index, side_label, led):
+def camera_loop(cam_index: int, side_label: str, led: SideLEDs) -> None:
     cap = cv2.VideoCapture(cam_index)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,  FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
